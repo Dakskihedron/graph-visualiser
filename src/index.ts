@@ -162,7 +162,7 @@ abstract class GraphAlgorithmVisualiser {
     public static runAlgorithm(): void {
         GraphEditor.setInteractionState(false);
 
-        console.log(`Running ${this._graphSelectedAlgorithm}...`);
+        alert("Coming soon!")
         // Todo: implement algorithm running
 
         GraphEditor.setInteractionState(true);
