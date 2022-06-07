@@ -1,6 +1,7 @@
 {
   "name": "graph-visualiser",
   "version": "1.0.0",
+  "homepage": "graph.dakskihedron.com",
   "main": "./dist/index.js",
   "author": "Dakskihedron",
   "license": "MIT",
