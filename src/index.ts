@@ -1,3 +1,5 @@
+import BFS from './algorithms/bfs.js';
+import DFS from './algorithms/dfs.js';
 import GraphNode from './graph-node.js';
 
 enum EditorMode {
@@ -5,7 +7,7 @@ enum EditorMode {
     RemoveElement = "removeElement"
 }
 
-enum GraphAlgorithm {
+enum AlgorithmSelection {
     BFS = "bfs",
     DFS = "dfs"
 }
@@ -16,7 +18,7 @@ abstract class GraphEditor {
     private static _editorSelectedMode: EditorMode = EditorMode.AddElement;
     private static readonly _graphEditorWindow: SVGGElement = document.getElementById("graphEditorWindow") as unknown as SVGGElement;
 
-    private static _allowInteraction: boolean = true;
+    private static _runningProcess: boolean = false;
     private static _startNode: GraphNode | null = null;
     private static _awaitingEndNode: boolean = false;
 
@@ -127,12 +129,12 @@ abstract class GraphEditor {
     }
 
     public static async editorInteractionEvent(event: MouseEvent): Promise<void> {
-        if (this._allowInteraction == false) return;
-        this._allowInteraction = false;
+        if (this._runningProcess == true) return;
+        this._runningProcess = true;
 
         if (this._awaitingEndNode == true) {
             await this.addElementToGraph(event);
-            this._allowInteraction = true;
+            this._runningProcess = false;
             return;
         }
 
@@ -144,31 +146,72 @@ abstract class GraphEditor {
                     await this.removeElementFromGraph(event);
                 break;
         }
-        this._allowInteraction = true;
+        this._runningProcess = false;
     }
 
     public static setEditorMode(selectedMode: EditorMode): void {
         this._editorSelectedMode = selectedMode;
     }
 
-    public static setInteractionState(state: boolean): void {
-        this._allowInteraction = state;
+    public static getProcessStatus(): boolean {
+        return this._runningProcess;
+    }
+
+    public static setProcessStatus(state: boolean): void {
+        this._runningProcess = state;
+    }
+
+    public static getNodesList(): GraphNode[] {
+        return this._graphNodesList;
+    }
+
+    public static resetNodesListColour(): void {
+        if (this._runningProcess == false) {
+            this._graphNodesList.forEach(node => {
+                node.setNodeColour("white");
+                node.setTextColour("black");
+            });
+        }
+    }
+
+    public static editorClearAll(): void {
+        if (this._runningProcess == true) return;
+
+        if (this._awaitingEndNode == true) {
+            this._startNode!.toggleSelected();
+            this._startNode = null;
+            this._awaitingEndNode = false;
+        }
+
+        if (confirm("Are you sure you want to clear all nodes and edges?") == true) {
+            document.getElementById("graphEditorEdgesGroup")!.replaceChildren();
+            document.getElementById("graphEditorNodesGroup")!.replaceChildren();
+            this._graphNodesList = new Array();
+            this._currentNodeValues = new Array();
+        }
     }
 }
 
 abstract class GraphAlgorithmVisualiser {
-    private static _graphSelectedAlgorithm: GraphAlgorithm = GraphAlgorithm.BFS;
+    private static _graphSelectedAlgorithm: AlgorithmSelection = AlgorithmSelection.BFS;
 
-    public static runAlgorithm(): void {
-        GraphEditor.setInteractionState(false);
+    public static async runAlgorithm(): Promise<void> {
+        if (GraphEditor.getProcessStatus() == true) return;
+        GraphEditor.setProcessStatus(true);
 
-        alert("Coming soon!")
-        // Todo: implement algorithm running
+        switch (this._graphSelectedAlgorithm) {
+            case AlgorithmSelection.BFS:
+                await BFS.runAlgorithm(GraphEditor.getNodesList());
+                break;
+            case AlgorithmSelection.DFS:
+                await DFS.runAlgorithm(GraphEditor.getNodesList());
+                break;
+        }
 
-        GraphEditor.setInteractionState(true);
+        GraphEditor.setProcessStatus(false);
     }
 
-    public static setAlgorithm(algo: GraphAlgorithm): void {
+    public static setAlgorithm(algo: AlgorithmSelection): void {
         this._graphSelectedAlgorithm = algo;
     }
 }
@@ -181,10 +224,19 @@ document.getElementById("graphEditorModeSelect")!.addEventListener("input", (eve
     GraphEditor.setEditorMode((event.target as HTMLInputElement).value as EditorMode);
 }, false);
 
+document.getElementById("graphEditorClearAll")!.addEventListener("click", () => {
+    GraphEditor.editorClearAll();
+}, false);
+
 document.getElementById("graphAlgorithmSelect")!.addEventListener("input", (event) => {
-    GraphAlgorithmVisualiser.setAlgorithm((event.target as HTMLInputElement).value as GraphAlgorithm);
+    GraphAlgorithmVisualiser.setAlgorithm((event.target as HTMLInputElement).value as AlgorithmSelection);
 }, false);
 
 document.getElementById("graphAlgorithmRunButton")!.addEventListener("click", () => {
+    GraphEditor.resetNodesListColour();
     GraphAlgorithmVisualiser.runAlgorithm();
 }, false)
+
+document.getElementById("graphReset")!.addEventListener("click", () => {
+    GraphEditor.resetNodesListColour();
+})
