@@ -1,0 +1,11 @@
+#graphEditorWindow {
+    box-sizing: border-box;
+    border: 1px solid black;
+}
+
+.graph-node {
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    color: black;
+}
