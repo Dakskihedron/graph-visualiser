@@ -35,6 +35,7 @@ export default class GraphNode {
         elementText.setAttributeNS(null, "text-anchor", "middle");
         elementText.setAttributeNS(null, "font-size", "20px");
         elementText.setAttributeNS(null, "stroke", "black");
+        elementText.setAttributeNS(null, "fill", "black");
 
         elementText.appendChild(text);
         this._element.appendChild(elementCircle);
@@ -72,6 +73,10 @@ export default class GraphNode {
         return true;
     }
 
+    public getListOfNeighbours(): GraphNode[] {
+        return this._adjacentNodeList;
+    }
+
     public getListOfEdges(): SVGPathElement[] {
         return this._edgesList;
     }
@@ -91,5 +96,21 @@ export default class GraphNode {
         } else {
             circle.setAttributeNS(null, "fill", "white");
         }
+    }
+
+    public getNodeColour(): string {
+        const circle = this._element.firstChild as SVGCircleElement;
+        return circle.getAttributeNS(null, "fill")!;
+    }
+
+    public setNodeColour(colour: string): void {
+        const circle = this._element.firstChild as SVGCircleElement;
+        circle.setAttributeNS(null, "fill", colour);
+    }
+
+    public setTextColour(colour: string): void {
+        const text = this._element.lastChild as SVGTextElement;
+        text.setAttributeNS(null, "stroke", colour);
+        text.setAttributeNS(null, "fill", colour);
     }
 }
