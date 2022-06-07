@@ -10,14 +10,14 @@
     <body>
         <div id="graphEditorWrapper">
             <svg id="graphEditorWindow" width="700px" height="700px">
+                <def>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="23" refY="5"
+                    markerWidth="6" markerHeight="6"
+                    orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z"/>
+                    </marker>
+                </def>
                 <g id="graphEditorEdgesGroup"></g>
-                    <def>
-                        <marker id="arrow" viewBox="0 0 10 10" refX="23" refY="5"
-                        markerWidth="6" markerHeight="6"
-                        orient="auto-start-reverse">
-                        <path d="M 0 0 L 10 5 L 0 10 z"/>
-                        </marker>
-                    </def>
                 <g id="graphEditorNodesGroup"></g>
             </svg>
         </div>
@@ -26,12 +26,14 @@
             <option value="addElement" selected>Add node/edge</option>
             <option value="removeElement">Remove node/edge</option>
         </select>
-        <label style="margin-left: 20px">Algorithm:</label>
+        <button id="graphEditorClearAll">Clear all</button>
+        <label style="margin-left: 30px">Algorithm:</label>
         <select id="graphAlgorithmSelect" autocomplete="off">
             <option value="bfs" selected>Breadth-first search</option>
             <option value="dfs">Depth-first search</option>
         </select>
         <button id="graphAlgorithmRunButton">Run</button>
+        <button id="graphReset">Reset</button>
         <script defer="" src="./dist/index.js" type="module"></script>
     </body>
 </html>
