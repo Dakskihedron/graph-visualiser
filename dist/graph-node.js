@@ -26,6 +26,7 @@ var GraphNode = /** @class */ (function () {
         elementText.setAttributeNS(null, "text-anchor", "middle");
         elementText.setAttributeNS(null, "font-size", "20px");
         elementText.setAttributeNS(null, "stroke", "black");
+        elementText.setAttributeNS(null, "fill", "black");
         elementText.appendChild(text);
         this._element.appendChild(elementCircle);
         this._element.appendChild(elementText);
@@ -56,6 +57,9 @@ var GraphNode = /** @class */ (function () {
             return false;
         return true;
     };
+    GraphNode.prototype.getListOfNeighbours = function () {
+        return this._adjacentNodeList;
+    };
     GraphNode.prototype.getListOfEdges = function () {
         return this._edgesList;
     };
@@ -73,6 +77,19 @@ var GraphNode = /** @class */ (function () {
         else {
             circle.setAttributeNS(null, "fill", "white");
         }
+    };
+    GraphNode.prototype.getNodeColour = function () {
+        var circle = this._element.firstChild;
+        return circle.getAttributeNS(null, "fill");
+    };
+    GraphNode.prototype.setNodeColour = function (colour) {
+        var circle = this._element.firstChild;
+        circle.setAttributeNS(null, "fill", colour);
+    };
+    GraphNode.prototype.setTextColour = function (colour) {
+        var text = this._element.lastChild;
+        text.setAttributeNS(null, "stroke", colour);
+        text.setAttributeNS(null, "fill", colour);
     };
     return GraphNode;
 }());

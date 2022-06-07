@@ -34,17 +34,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+import BFS from './algorithms/bfs.js';
+import DFS from './algorithms/dfs.js';
 import GraphNode from './graph-node.js';
 var EditorMode;
 (function (EditorMode) {
     EditorMode["AddElement"] = "addElement";
     EditorMode["RemoveElement"] = "removeElement";
 })(EditorMode || (EditorMode = {}));
-var GraphAlgorithm;
-(function (GraphAlgorithm) {
-    GraphAlgorithm["BFS"] = "bfs";
-    GraphAlgorithm["DFS"] = "dfs";
-})(GraphAlgorithm || (GraphAlgorithm = {}));
+var AlgorithmSelection;
+(function (AlgorithmSelection) {
+    AlgorithmSelection["BFS"] = "bfs";
+    AlgorithmSelection["DFS"] = "dfs";
+})(AlgorithmSelection || (AlgorithmSelection = {}));
 var GraphEditor = /** @class */ (function () {
     function GraphEditor() {
     }
@@ -204,14 +206,14 @@ var GraphEditor = /** @class */ (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        if (this._allowInteraction == false)
+                        if (this._runningProcess == true)
                             return [2 /*return*/];
-                        this._allowInteraction = false;
+                        this._runningProcess = true;
                         if (!(this._awaitingEndNode == true)) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.addElementToGraph(event)];
                     case 1:
                         _b.sent();
-                        this._allowInteraction = true;
+                        this._runningProcess = false;
                         return [2 /*return*/];
                     case 2:
                         _a = this._editorSelectedMode;
@@ -229,7 +231,7 @@ var GraphEditor = /** @class */ (function () {
                         _b.sent();
                         return [3 /*break*/, 7];
                     case 7:
-                        this._allowInteraction = true;
+                        this._runningProcess = false;
                         return [2 /*return*/];
                 }
             });
@@ -238,14 +240,43 @@ var GraphEditor = /** @class */ (function () {
     GraphEditor.setEditorMode = function (selectedMode) {
         this._editorSelectedMode = selectedMode;
     };
-    GraphEditor.setInteractionState = function (state) {
-        this._allowInteraction = state;
+    GraphEditor.getProcessStatus = function () {
+        return this._runningProcess;
+    };
+    GraphEditor.setProcessStatus = function (state) {
+        this._runningProcess = state;
+    };
+    GraphEditor.getNodesList = function () {
+        return this._graphNodesList;
+    };
+    GraphEditor.resetNodesListColour = function () {
+        if (this._runningProcess == false) {
+            this._graphNodesList.forEach(function (node) {
+                node.setNodeColour("white");
+                node.setTextColour("black");
+            });
+        }
+    };
+    GraphEditor.editorClearAll = function () {
+        if (this._runningProcess == true)
+            return;
+        if (this._awaitingEndNode == true) {
+            this._startNode.toggleSelected();
+            this._startNode = null;
+            this._awaitingEndNode = false;
+        }
+        if (confirm("Are you sure you want to clear all nodes and edges?") == true) {
+            document.getElementById("graphEditorEdgesGroup").replaceChildren();
+            document.getElementById("graphEditorNodesGroup").replaceChildren();
+            this._graphNodesList = new Array();
+            this._currentNodeValues = new Array();
+        }
     };
     GraphEditor._graphNodesList = new Array();
     GraphEditor._currentNodeValues = new Array();
     GraphEditor._editorSelectedMode = EditorMode.AddElement;
     GraphEditor._graphEditorWindow = document.getElementById("graphEditorWindow");
-    GraphEditor._allowInteraction = true;
+    GraphEditor._runningProcess = false;
     GraphEditor._startNode = null;
     GraphEditor._awaitingEndNode = false;
     return GraphEditor;
@@ -254,15 +285,39 @@ var GraphAlgorithmVisualiser = /** @class */ (function () {
     function GraphAlgorithmVisualiser() {
     }
     GraphAlgorithmVisualiser.runAlgorithm = function () {
-        GraphEditor.setInteractionState(false);
-        alert("Coming soon!");
-        // Todo: implement algorithm running
-        GraphEditor.setInteractionState(true);
+        return __awaiter(this, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (GraphEditor.getProcessStatus() == true)
+                            return [2 /*return*/];
+                        GraphEditor.setProcessStatus(true);
+                        _a = this._graphSelectedAlgorithm;
+                        switch (_a) {
+                            case AlgorithmSelection.BFS: return [3 /*break*/, 1];
+                            case AlgorithmSelection.DFS: return [3 /*break*/, 3];
+                        }
+                        return [3 /*break*/, 5];
+                    case 1: return [4 /*yield*/, BFS.runAlgorithm(GraphEditor.getNodesList())];
+                    case 2:
+                        _b.sent();
+                        return [3 /*break*/, 5];
+                    case 3: return [4 /*yield*/, DFS.runAlgorithm(GraphEditor.getNodesList())];
+                    case 4:
+                        _b.sent();
+                        return [3 /*break*/, 5];
+                    case 5:
+                        GraphEditor.setProcessStatus(false);
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     GraphAlgorithmVisualiser.setAlgorithm = function (algo) {
         this._graphSelectedAlgorithm = algo;
     };
-    GraphAlgorithmVisualiser._graphSelectedAlgorithm = GraphAlgorithm.BFS;
+    GraphAlgorithmVisualiser._graphSelectedAlgorithm = AlgorithmSelection.BFS;
     return GraphAlgorithmVisualiser;
 }());
 document.getElementById("graphEditorWindow").addEventListener("click", function (event) {
@@ -271,9 +326,16 @@ document.getElementById("graphEditorWindow").addEventListener("click", function 
 document.getElementById("graphEditorModeSelect").addEventListener("input", function (event) {
     GraphEditor.setEditorMode(event.target.value);
 }, false);
+document.getElementById("graphEditorClearAll").addEventListener("click", function () {
+    GraphEditor.editorClearAll();
+}, false);
 document.getElementById("graphAlgorithmSelect").addEventListener("input", function (event) {
     GraphAlgorithmVisualiser.setAlgorithm(event.target.value);
 }, false);
 document.getElementById("graphAlgorithmRunButton").addEventListener("click", function () {
+    GraphEditor.resetNodesListColour();
     GraphAlgorithmVisualiser.runAlgorithm();
 }, false);
+document.getElementById("graphReset").addEventListener("click", function () {
+    GraphEditor.resetNodesListColour();
+});
