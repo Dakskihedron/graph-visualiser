@@ -1,44 +1,42 @@
-import GraphNode from "../graph-node.js";
+import Vertex from "../vertex.js";
 import { wait } from "../utils.js";
 
 export default abstract class DFS {
-    public static async runAlgorithm(nodeList: GraphNode[]): Promise<void> {
-        const sortedNodeList = nodeList.sort((v, w) => v.getNodeValue() - w.getNodeValue());
-        const colour: string[] = new Array(sortedNodeList.length).fill("white");
-        const pred: number[] = new Array(sortedNodeList.length).fill(null);
-        const seen: number[] = new Array(sortedNodeList.length).fill(null);
-        const done: number[] = new Array(sortedNodeList.length).fill(null);
+    public static async runAlgorithm(vertices: Vertex[]): Promise<void> {
+        const sortedVertices = vertices.sort((v, w) => v.getVertexValue() - w.getVertexValue());
+        const colour: string[] = new Array(sortedVertices.length).fill("white");
+        const pred: number[] = new Array(sortedVertices.length).fill(null);
+        const seen: number[] = new Array(sortedVertices.length).fill(null);
+        const done: number[] = new Array(sortedVertices.length).fill(null);
         let time = 0;
 
-        await wait();
-
-        async function dfsRecursiveVisit(node: GraphNode) {
-            const s = node.getNodeValue();
+        async function dfsRecursiveVisit(vertice: Vertex) {
+            const s = vertice.getVertexValue();
             colour[s] = "grey";
-            node.setNodeColour("grey");
+            vertice.setCircleColour("grey");
             seen[s] = time++;
 
             await wait();
 
-            for (const neighbour of node.getListOfNeighbours().sort((v, w) => v.getNodeValue() - w.getNodeValue())) {
-                if (colour[neighbour.getNodeValue()] == "white") {
-                    pred[neighbour.getNodeValue()] = s;
+            for (const neighbour of vertice.getNeighbours().sort((v, w) => v.getVertexValue() - w.getVertexValue())) {
+                if (colour[neighbour.getVertexValue()] == "white") {
+                    pred[neighbour.getVertexValue()] = s;
                     await dfsRecursiveVisit(neighbour);
                 }
             }
 
             colour[s] = "black";
-            node.setNodeColour("black");
-            node.setTextColour("white");
+            vertice.setCircleColour("black");
+            vertice.setTextColour("white");
             done[s] = time++;
 
             await wait();
         }
 
-        for (const node of sortedNodeList) {
-            if (colour[node.getNodeValue()] == "white") {
+        for (const vertice of sortedVertices) {
+            if (colour[vertice.getVertexValue()] == "white") {
                 await wait();
-                await dfsRecursiveVisit(node);
+                await dfsRecursiveVisit(vertice);
             }
         }
 

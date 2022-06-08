@@ -1,51 +1,49 @@
-import GraphNode from "../graph-node.js";
+import Vertex from "../vertex.js";
 import { wait, Queue } from "../utils.js";
 
 export default abstract class BFS {
-    public static async runAlgorithm(nodeList: GraphNode[]): Promise<void> {
-        const sortedNodeList = nodeList.sort((v, w) => v.getNodeValue() - w.getNodeValue());
-        const colour: string[] = new Array(sortedNodeList.length).fill("white");
-        const pred: number[] = new Array(sortedNodeList.length).fill(null);
-        const done: number[] = new Array(sortedNodeList.length).fill(null);
-        const queue = new Queue<GraphNode>();
+    public static async runAlgorithm(vertices: Vertex[]): Promise<void> {
+        const sortedVertices = vertices.sort((v, w) => v.getVertexValue() - w.getVertexValue());
+        const colour: string[] = new Array(sortedVertices.length).fill("white");
+        const pred: number[] = new Array(sortedVertices.length).fill(null);
+        const done: number[] = new Array(sortedVertices.length).fill(null);
+        const queue = new Queue<Vertex>();
 
-        await wait();
-
-        async function bfsVisit(node: GraphNode) {
-            const s = node.getNodeValue();
+        async function bfsVisit(vertice: Vertex) {
+            const s = vertice.getVertexValue();
             colour[s] = "grey";
-            node.setNodeColour("grey");
-            done[s] = 0
-            queue.enqueue(node);
+            vertice.setCircleColour("grey");
+            done[s] = 0;
+            queue.enqueue(vertice);
 
             await wait();
 
             while (queue.isEmpty() == false) {
                 const u = queue.peek()!;
-                for (const v of u.getListOfNeighbours().sort((v, w) => v.getNodeValue() - w.getNodeValue())) {
-                    const i = v.getNodeValue();
+                for (const v of u.getNeighbours().sort((v, w) => v.getVertexValue() - w.getVertexValue())) {
+                    const i = v.getVertexValue();
                     if (colour[i] == "white") {
                         colour[i] = "grey";
-                        v.setNodeColour("grey");
-                        pred[i] = u.getNodeValue();
-                        done[i] = done[u.getNodeValue()] + 1;
+                        v.setCircleColour("grey");
+                        pred[i] = u.getVertexValue();
+                        done[i] = done[u.getVertexValue()] + 1;
                         queue.enqueue(v);
                         await wait();
                     }
                 }
                 queue.dequeue();
-                colour[u.getNodeValue()] = "black";
-                u.setNodeColour("black");
+                colour[u.getVertexValue()] = "black";
+                u.setCircleColour("black");
                 u.setTextColour("white");
 
                 await wait();
             }
-
         }
 
-        for (const node of sortedNodeList) {
-            if (colour[node.getNodeValue()] == "white") {
-                await bfsVisit(node);
+        for (const vertice of sortedVertices) {
+            if (colour[vertice.getVertexValue()] == "white") {
+                await wait();
+                await bfsVisit(vertice);
             }
         }
 
