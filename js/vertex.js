@@ -42,6 +42,10 @@ var Vertex = /** @class */ (function () {
         document.getElementById("graphVerticesGroup").appendChild(this.vertexGroup);
     };
     Vertex.prototype.destroyDOMObject = function () {
+        this.edges
+            .slice()
+            .reverse()
+            .forEach(function (edge) { return edge.destroyDOMObject(); });
         this.vertexGroup.remove();
     };
     Vertex.prototype.addNeighbour = function (vertex) {

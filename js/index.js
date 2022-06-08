@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 import BFS from "./algorithms/bfs.js";
 import DFS from "./algorithms/dfs.js";
+import Edge from "./edge.js";
 import Vertex from "./vertex.js";
 var EditorMode;
 (function (EditorMode) {
@@ -64,6 +65,9 @@ var GraphEditor = /** @class */ (function () {
         var vertexId = parseInt(id);
         return this.vertices.find(function (v) { return v.getVertexValue() == vertexId; });
     };
+    GraphEditor.getEdge = function (edge) {
+        return this.edges.find(function (e) { return e.getDOMObject() == edge; });
+    };
     GraphEditor.addVertex = function (x, y) {
         return __awaiter(this, void 0, void 0, function () {
             var value, newVertex;
@@ -81,17 +85,13 @@ var GraphEditor = /** @class */ (function () {
     };
     GraphEditor.removeVertex = function (element) {
         return __awaiter(this, void 0, void 0, function () {
-            var vertex;
+            var vertex, vertexEdges;
             var _this = this;
             return __generator(this, function (_a) {
                 vertex = this.getVertex(element.id);
-                vertex
-                    .getEdges()
-                    .slice()
-                    .reverse()
-                    .forEach(function (edge) { return _this.removeEdge(edge); });
-                this.vertices.filter(function (v) { return v.hasNeighbour(vertex); }).forEach(function (v) { return v.removeNeighbour(vertex); });
+                vertexEdges = vertex.getEdges().slice().reverse();
                 vertex.destroyDOMObject();
+                vertexEdges.forEach(function (e) { return _this.edges.splice(_this.edges.indexOf(e), 1); });
                 this.vertices.splice(this.vertices.indexOf(vertex), 1);
                 this.reservedValues.splice(this.reservedValues.indexOf(parseInt(element.id)), 1);
                 return [2 /*return*/];
@@ -110,47 +110,27 @@ var GraphEditor = /** @class */ (function () {
     };
     GraphEditor.addEdgeEnd = function (element) {
         return __awaiter(this, void 0, void 0, function () {
-            var vertex, newEdge, startCoord, endCoord, edgeAttributes;
+            var vertex, start, end, newEdge;
             return __generator(this, function (_a) {
                 vertex = this.getVertex(element.id);
                 if (vertex == this.selectedVertex || this.selectedVertex.hasNeighbour(vertex))
                     return [2 /*return*/];
-                this.selectedVertex.addNeighbour(vertex);
-                newEdge = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                startCoord = this.selectedVertex.getVertexCoords();
-                endCoord = vertex.getVertexCoords();
-                edgeAttributes = {
-                    class: "edge",
-                    d: "M ".concat(startCoord.x, ",").concat(startCoord.y, " L ").concat(endCoord.x, ",").concat(endCoord.y),
-                    stroke: "black",
-                    "stroke-width": "3",
-                    fill: "none",
-                    "marker-end": "url(#arrow)",
-                };
-                Object.keys(edgeAttributes).forEach(function (attr) {
-                    newEdge.setAttributeNS(null, attr, edgeAttributes[attr]);
-                });
-                this.selectedVertex.addEdge(newEdge);
-                vertex.addEdge(newEdge);
-                document.getElementById("graphEdgesGroup").appendChild(newEdge);
+                start = this.selectedVertex.getVertexCoords();
+                end = vertex.getVertexCoords();
+                newEdge = new Edge(this.selectedVertex, vertex);
+                newEdge.createDOMObject(start.x, start.y, end.x, end.y);
+                this.edges.push(newEdge);
                 return [2 /*return*/];
             });
         });
     };
-    GraphEditor.removeEdge = function (edge) {
+    GraphEditor.removeEdge = function (e) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, v1, _b, _c, v2;
-            return __generator(this, function (_d) {
-                for (_i = 0, _a = this.vertices.filter(function (v) { return v.hasEdge(edge); }); _i < _a.length; _i++) {
-                    v1 = _a[_i];
-                    for (_b = 0, _c = this.vertices.filter(function (v) { return v.hasEdge(edge); }); _b < _c.length; _b++) {
-                        v2 = _c[_b];
-                        if (v1.hasNeighbour(v2))
-                            v1.hasNeighbour(v2);
-                    }
-                }
-                this.vertices.filter(function (v) { return v.hasEdge(edge); }).forEach(function (v) { return v.removeEdge(edge); });
-                edge.remove();
+            var edge;
+            return __generator(this, function (_a) {
+                edge = this.getEdge(e);
+                edge.destroyDOMObject();
+                this.edges.splice(this.edges.indexOf(edge), 1);
                 return [2 /*return*/];
             });
         });
@@ -286,11 +266,13 @@ var GraphEditor = /** @class */ (function () {
             document.getElementById("graphEdgesGroup").replaceChildren();
             document.getElementById("graphVerticesGroup").replaceChildren();
             this.vertices = new Array();
+            this.edges = new Array();
             this.reservedValues = new Array();
         }
     };
     GraphEditor.graphEditor = document.getElementById("editorWindow");
     GraphEditor.vertices = new Array();
+    GraphEditor.edges = new Array();
     GraphEditor.reservedValues = new Array();
     GraphEditor.selectedEditorMode = EditorMode.AddElement;
     GraphEditor.inProgress = false;
