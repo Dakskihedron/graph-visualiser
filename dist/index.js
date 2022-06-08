@@ -34,9 +34,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import BFS from './algorithms/bfs.js';
-import DFS from './algorithms/dfs.js';
-import GraphNode from './graph-node.js';
+import BFS from "./algorithms/bfs.js";
+import DFS from "./algorithms/dfs.js";
+import Vertex from "./vertex.js";
 var EditorMode;
 (function (EditorMode) {
     EditorMode["AddElement"] = "addElement";
@@ -50,235 +50,252 @@ var AlgorithmSelection;
 var GraphEditor = /** @class */ (function () {
     function GraphEditor() {
     }
-    GraphEditor.getNextNodeValue = function () {
+    GraphEditor.getNextValue = function () {
         for (var n = 0; n < 100; n++) {
-            if (this._currentNodeValues.indexOf(n) == -1)
+            if (this.reservedValues.indexOf(n) == -1)
                 return n;
         }
-        return null;
     };
-    GraphEditor.convertMousePosToSVGPos = function (event) {
-        var ctm = (this._graphEditorWindow).getScreenCTM();
+    GraphEditor.translatePos = function (event) {
+        var ctm = this.graphEditor.getScreenCTM();
         return { x: (event.clientX - ctm.e) / ctm.a, y: (event.clientY - ctm.f) / ctm.d };
     };
-    GraphEditor.addNodeToGraph = function (x, y) {
+    GraphEditor.getVertex = function (id) {
+        var vertexId = parseInt(id);
+        return this.vertices.find(function (v) { return v.getVertexValue() == vertexId; });
+    };
+    GraphEditor.addVertex = function (x, y) {
         return __awaiter(this, void 0, void 0, function () {
-            var nodeValue, newGraphNode;
+            var value, newVertex;
             return __generator(this, function (_a) {
-                nodeValue = this.getNextNodeValue();
-                if (nodeValue == null)
+                value = this.getNextValue();
+                if (value == undefined)
                     return [2 /*return*/, false];
-                newGraphNode = new GraphNode(nodeValue, x, y);
-                this._graphNodesList.push(newGraphNode);
-                this._currentNodeValues.push(nodeValue);
+                newVertex = new Vertex(value, x, y);
+                newVertex.createDOMObject(x, y);
+                this.vertices.push(newVertex);
+                this.reservedValues.push(value);
                 return [2 /*return*/, true];
             });
         });
     };
-    GraphEditor.removeNodeFromGraph = function (node) {
+    GraphEditor.removeVertex = function (element) {
         return __awaiter(this, void 0, void 0, function () {
-            var index, nodeObj;
+            var vertex;
             var _this = this;
             return __generator(this, function (_a) {
-                index = this._graphNodesList.map(function (node) { return node.getNodeValue(); }).indexOf(parseInt(node.id));
-                nodeObj = this._graphNodesList[index];
-                nodeObj.getListOfEdges().slice().reverse().forEach(function (edge) { return _this.removeEdgeFromGraph(edge); });
-                this._graphNodesList.filter(function (node) { return node.hasAdjacentNode(nodeObj); }).forEach(function (node) { return node.removeAdjacentNode(nodeObj); });
-                nodeObj.destoryDOMElement();
-                this._graphNodesList.splice(index, 1);
-                this._currentNodeValues.splice(this._currentNodeValues.indexOf(parseInt(node.id)), 1);
+                vertex = this.getVertex(element.id);
+                vertex
+                    .getEdges()
+                    .slice()
+                    .reverse()
+                    .forEach(function (edge) { return _this.removeEdge(edge); });
+                this.vertices.filter(function (v) { return v.hasNeighbour(vertex); }).forEach(function (v) { return v.removeNeighbour(vertex); });
+                vertex.destroyDOMObject();
+                this.vertices.splice(this.vertices.indexOf(vertex), 1);
+                this.reservedValues.splice(this.reservedValues.indexOf(parseInt(element.id)), 1);
                 return [2 /*return*/];
             });
         });
     };
-    GraphEditor.startAddEdgeToGraph = function (node) {
+    GraphEditor.addEdgeStart = function (element) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                this._startNode = this._graphNodesList[this._graphNodesList.map(function (node) { return node.getNodeValue(); }).indexOf(parseInt(node.id))];
-                this._awaitingEndNode = true;
-                this._startNode.toggleSelected();
+                this.selectedVertex = this.getVertex(element.id);
+                this.drawingEdge = true;
+                this.selectedVertex.toggleSelected();
                 return [2 /*return*/];
             });
         });
     };
-    GraphEditor.finishAddEdgeToGraph = function (node) {
+    GraphEditor.addEdgeEnd = function (element) {
         return __awaiter(this, void 0, void 0, function () {
-            var nodeObj, newEdge, startCoord, endCoord;
+            var vertex, newEdge, startCoord, endCoord, edgeAttributes;
             return __generator(this, function (_a) {
-                nodeObj = this._graphNodesList[this._graphNodesList.map(function (node) { return node.getNodeValue(); }).indexOf(parseInt(node.id))];
-                if (nodeObj == this._startNode)
+                vertex = this.getVertex(element.id);
+                if (vertex == this.selectedVertex || this.selectedVertex.hasNeighbour(vertex))
                     return [2 /*return*/];
-                if (this._startNode.hasAdjacentNode(nodeObj))
-                    return [2 /*return*/];
-                this._startNode.addAdjacentNode(nodeObj);
+                this.selectedVertex.addNeighbour(vertex);
                 newEdge = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                startCoord = this._startNode.getNodeCoordinates();
-                endCoord = nodeObj.getNodeCoordinates();
-                newEdge.setAttributeNS(null, "d", "M ".concat(startCoord.x, ",").concat(startCoord.y, " L ").concat(endCoord.x, ",").concat(endCoord.y));
-                newEdge.setAttributeNS(null, "stroke", "black");
-                newEdge.setAttributeNS(null, "stroke-width", "3");
-                newEdge.setAttributeNS(null, "fill", "none");
-                newEdge.setAttributeNS(null, "marker-end", "url(#arrow)");
-                this._startNode.addEdge(newEdge);
-                nodeObj.addEdge(newEdge);
-                document.getElementById("graphEditorEdgesGroup").appendChild(newEdge);
+                startCoord = this.selectedVertex.getVertexCoords();
+                endCoord = vertex.getVertexCoords();
+                edgeAttributes = {
+                    class: "edge",
+                    d: "M ".concat(startCoord.x, ",").concat(startCoord.y, " L ").concat(endCoord.x, ",").concat(endCoord.y),
+                    stroke: "black",
+                    "stroke-width": "3",
+                    fill: "none",
+                    "marker-end": "url(#arrow)",
+                };
+                Object.keys(edgeAttributes).forEach(function (attr) {
+                    newEdge.setAttributeNS(null, attr, edgeAttributes[attr]);
+                });
+                this.selectedVertex.addEdge(newEdge);
+                vertex.addEdge(newEdge);
+                document.getElementById("graphEdgesGroup").appendChild(newEdge);
                 return [2 /*return*/];
             });
         });
     };
-    GraphEditor.removeEdgeFromGraph = function (edge) {
+    GraphEditor.removeEdge = function (edge) {
         return __awaiter(this, void 0, void 0, function () {
-            var _i, _a, node1, _b, _c, node2;
+            var _i, _a, v1, _b, _c, v2;
             return __generator(this, function (_d) {
-                for (_i = 0, _a = this._graphNodesList.filter(function (node) { return node.hasEdge(edge); }); _i < _a.length; _i++) {
-                    node1 = _a[_i];
-                    for (_b = 0, _c = this._graphNodesList.filter(function (node) { return node.hasEdge(edge); }); _b < _c.length; _b++) {
-                        node2 = _c[_b];
-                        if (node1.hasAdjacentNode(node2))
-                            node1.removeAdjacentNode(node2);
+                for (_i = 0, _a = this.vertices.filter(function (v) { return v.hasEdge(edge); }); _i < _a.length; _i++) {
+                    v1 = _a[_i];
+                    for (_b = 0, _c = this.vertices.filter(function (v) { return v.hasEdge(edge); }); _b < _c.length; _b++) {
+                        v2 = _c[_b];
+                        if (v1.hasNeighbour(v2))
+                            v1.hasNeighbour(v2);
                     }
                 }
-                this._graphNodesList.filter(function (node) { return node.hasEdge(edge); }).forEach(function (node) { return node.removeEdge(edge); });
+                this.vertices.filter(function (v) { return v.hasEdge(edge); }).forEach(function (v) { return v.removeEdge(edge); });
                 edge.remove();
                 return [2 /*return*/];
             });
         });
     };
-    GraphEditor.addElementToGraph = function (event) {
+    GraphEditor.editorAddElement = function (event) {
         return __awaiter(this, void 0, void 0, function () {
-            var element, coord, success, element;
+            var element, coord, success;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(this._awaitingEndNode == true)) return [3 /*break*/, 3];
-                        if (!(this._editorSelectedMode == EditorMode.AddElement)) return [3 /*break*/, 2];
-                        element = event.target.parentNode;
-                        if (!((element instanceof SVGGElement) && (element.classList.contains("graph-node")))) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.finishAddEdgeToGraph(element)];
+                        element = event.target.parentElement;
+                        if (!(this.drawingEdge == true)) return [3 /*break*/, 3];
+                        if (!(this.selectedEditorMode == EditorMode.AddElement)) return [3 /*break*/, 2];
+                        if (!(element instanceof SVGGElement && element.classList.contains("vertex"))) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.addEdgeEnd(element)];
                     case 1:
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        this._startNode.toggleSelected();
-                        this._startNode = null;
-                        this._awaitingEndNode = false;
+                        this.selectedVertex.toggleSelected();
+                        this.selectedVertex = null;
+                        this.drawingEdge = false;
                         return [3 /*break*/, 7];
                     case 3:
-                        if (!(event.target == this._graphEditorWindow)) return [3 /*break*/, 5];
-                        coord = this.convertMousePosToSVGPos(event);
-                        return [4 /*yield*/, this.addNodeToGraph(coord.x, coord.y)];
+                        if (!(element instanceof SVGGElement && element.classList.contains("vertex"))) return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.addEdgeStart(element)];
                     case 4:
-                        success = _a.sent();
-                        if (success == false) {
-                            alert("Reached node limit.");
-                        }
+                        _a.sent();
                         return [3 /*break*/, 7];
                     case 5:
-                        element = event.target.parentNode;
-                        if (!((element instanceof SVGGElement) && (element.classList.contains("graph-node")))) return [3 /*break*/, 7];
-                        return [4 /*yield*/, this.startAddEdgeToGraph(element)];
+                        if (!(event.target == this.graphEditor)) return [3 /*break*/, 7];
+                        coord = this.translatePos(event);
+                        return [4 /*yield*/, this.addVertex(coord.x, coord.y)];
                     case 6:
-                        _a.sent();
+                        success = _a.sent();
+                        if (success == false)
+                            alert("Vertex limit reached.");
                         _a.label = 7;
                     case 7: return [2 /*return*/];
                 }
             });
         });
     };
-    GraphEditor.removeElementFromGraph = function (event) {
+    GraphEditor.editorRemoveElement = function (event) {
         return __awaiter(this, void 0, void 0, function () {
-            var selectedElement;
+            var element;
             return __generator(this, function (_a) {
-                selectedElement = event.target.parentElement;
-                if (selectedElement.classList.contains("graph-node")) {
-                    this.removeNodeFromGraph(selectedElement);
+                switch (_a.label) {
+                    case 0:
+                        element = event.target;
+                        if (!(element instanceof SVGPathElement)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.removeEdge(element)];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 2:
+                        if (!(element.parentElement instanceof SVGGElement && element.parentElement.classList.contains("vertex"))) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.removeVertex(element.parentElement)];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
                 }
-                else if (event.target instanceof SVGPathElement) {
-                    this.removeEdgeFromGraph(event.target);
-                }
-                return [2 /*return*/];
             });
         });
     };
-    GraphEditor.editorInteractionEvent = function (event) {
+    GraphEditor.editorEvent = function (event) {
         return __awaiter(this, void 0, void 0, function () {
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        if (this._runningProcess == true)
+                        if (this.inProgress == true)
                             return [2 /*return*/];
-                        this._runningProcess = true;
-                        if (!(this._awaitingEndNode == true)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.addElementToGraph(event)];
+                        this.inProgress = true;
+                        if (!(this.drawingEdge == true)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.editorAddElement(event)];
                     case 1:
                         _b.sent();
-                        this._runningProcess = false;
+                        this.inProgress = false;
                         return [2 /*return*/];
                     case 2:
-                        _a = this._editorSelectedMode;
+                        _a = this.selectedEditorMode;
                         switch (_a) {
                             case EditorMode.AddElement: return [3 /*break*/, 3];
                             case EditorMode.RemoveElement: return [3 /*break*/, 5];
                         }
                         return [3 /*break*/, 7];
-                    case 3: return [4 /*yield*/, this.addElementToGraph(event)];
+                    case 3: return [4 /*yield*/, this.editorAddElement(event)];
                     case 4:
                         _b.sent();
                         return [3 /*break*/, 7];
-                    case 5: return [4 /*yield*/, this.removeElementFromGraph(event)];
+                    case 5: return [4 /*yield*/, this.editorRemoveElement(event)];
                     case 6:
                         _b.sent();
                         return [3 /*break*/, 7];
                     case 7:
-                        this._runningProcess = false;
+                        this.inProgress = false;
                         return [2 /*return*/];
                 }
             });
         });
     };
     GraphEditor.setEditorMode = function (selectedMode) {
-        this._editorSelectedMode = selectedMode;
+        this.selectedEditorMode = selectedMode;
     };
     GraphEditor.getProcessStatus = function () {
-        return this._runningProcess;
+        return this.inProgress;
     };
     GraphEditor.setProcessStatus = function (state) {
-        this._runningProcess = state;
+        this.inProgress = state;
     };
-    GraphEditor.getNodesList = function () {
-        return this._graphNodesList;
+    GraphEditor.getVertices = function () {
+        return this.vertices;
     };
-    GraphEditor.resetNodesListColour = function () {
-        if (this._runningProcess == false) {
-            this._graphNodesList.forEach(function (node) {
-                node.setNodeColour("white");
-                node.setTextColour("black");
+    GraphEditor.resetVertices = function () {
+        if (this.inProgress == false) {
+            this.vertices.forEach(function (v) {
+                v.setCircleColour("white");
+                v.setTextColour("black");
             });
         }
     };
     GraphEditor.editorClearAll = function () {
-        if (this._runningProcess == true)
+        if (this.inProgress == true)
             return;
-        if (this._awaitingEndNode == true) {
-            this._startNode.toggleSelected();
-            this._startNode = null;
-            this._awaitingEndNode = false;
+        if (this.drawingEdge == true) {
+            this.selectedVertex.toggleSelected();
+            this.selectedVertex = null;
+            this.drawingEdge = false;
         }
-        if (confirm("Are you sure you want to clear all nodes and edges?") == true) {
-            document.getElementById("graphEditorEdgesGroup").replaceChildren();
-            document.getElementById("graphEditorNodesGroup").replaceChildren();
-            this._graphNodesList = new Array();
-            this._currentNodeValues = new Array();
+        if (confirm("Are you sure you want to clear all vertices and edges?") == true) {
+            document.getElementById("graphEdgesGroup").replaceChildren();
+            document.getElementById("graphVerticesGroup").replaceChildren();
+            this.vertices = new Array();
+            this.reservedValues = new Array();
         }
     };
-    GraphEditor._graphNodesList = new Array();
-    GraphEditor._currentNodeValues = new Array();
-    GraphEditor._editorSelectedMode = EditorMode.AddElement;
-    GraphEditor._graphEditorWindow = document.getElementById("graphEditorWindow");
-    GraphEditor._runningProcess = false;
-    GraphEditor._startNode = null;
-    GraphEditor._awaitingEndNode = false;
+    GraphEditor.graphEditor = document.getElementById("editorWindow");
+    GraphEditor.vertices = new Array();
+    GraphEditor.reservedValues = new Array();
+    GraphEditor.selectedEditorMode = EditorMode.AddElement;
+    GraphEditor.inProgress = false;
+    GraphEditor.selectedVertex = null;
+    GraphEditor.drawingEdge = false;
     return GraphEditor;
 }());
 var GraphAlgorithmVisualiser = /** @class */ (function () {
@@ -299,11 +316,11 @@ var GraphAlgorithmVisualiser = /** @class */ (function () {
                             case AlgorithmSelection.DFS: return [3 /*break*/, 3];
                         }
                         return [3 /*break*/, 5];
-                    case 1: return [4 /*yield*/, BFS.runAlgorithm(GraphEditor.getNodesList())];
+                    case 1: return [4 /*yield*/, BFS.runAlgorithm(GraphEditor.getVertices())];
                     case 2:
                         _b.sent();
                         return [3 /*break*/, 5];
-                    case 3: return [4 /*yield*/, DFS.runAlgorithm(GraphEditor.getNodesList())];
+                    case 3: return [4 /*yield*/, DFS.runAlgorithm(GraphEditor.getVertices())];
                     case 4:
                         _b.sent();
                         return [3 /*break*/, 5];
@@ -320,22 +337,22 @@ var GraphAlgorithmVisualiser = /** @class */ (function () {
     GraphAlgorithmVisualiser._graphSelectedAlgorithm = AlgorithmSelection.BFS;
     return GraphAlgorithmVisualiser;
 }());
-document.getElementById("graphEditorWindow").addEventListener("click", function (event) {
-    GraphEditor.editorInteractionEvent(event);
+document.getElementById("editorWindow").addEventListener("click", function (event) {
+    GraphEditor.editorEvent(event);
 }, false);
-document.getElementById("graphEditorModeSelect").addEventListener("input", function (event) {
+document.getElementById("editorModeSelect").addEventListener("input", function (event) {
     GraphEditor.setEditorMode(event.target.value);
 }, false);
-document.getElementById("graphEditorClearAll").addEventListener("click", function () {
+document.getElementById("editorClearAll").addEventListener("click", function () {
     GraphEditor.editorClearAll();
 }, false);
-document.getElementById("graphAlgorithmSelect").addEventListener("input", function (event) {
+document.getElementById("algorithmSelect").addEventListener("input", function (event) {
     GraphAlgorithmVisualiser.setAlgorithm(event.target.value);
 }, false);
-document.getElementById("graphAlgorithmRunButton").addEventListener("click", function () {
-    GraphEditor.resetNodesListColour();
+document.getElementById("runAlgorithm").addEventListener("click", function () {
+    GraphEditor.resetVertices();
     GraphAlgorithmVisualiser.runAlgorithm();
 }, false);
 document.getElementById("graphReset").addEventListener("click", function () {
-    GraphEditor.resetNodesListColour();
+    GraphEditor.resetVertices();
 });

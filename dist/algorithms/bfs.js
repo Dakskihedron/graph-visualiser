@@ -38,19 +38,19 @@ import { wait, Queue } from "../utils.js";
 var BFS = /** @class */ (function () {
     function BFS() {
     }
-    BFS.runAlgorithm = function (nodeList) {
+    BFS.runAlgorithm = function (vertices) {
         return __awaiter(this, void 0, void 0, function () {
-            function bfsVisit(node) {
+            function bfsVisit(vertice) {
                 return __awaiter(this, void 0, void 0, function () {
                     var s, u, _i, _a, v, i;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
                             case 0:
-                                s = node.getNodeValue();
+                                s = vertice.getVertexValue();
                                 colour[s] = "grey";
-                                node.setNodeColour("grey");
+                                vertice.setCircleColour("grey");
                                 done[s] = 0;
-                                queue.enqueue(node);
+                                queue.enqueue(vertice);
                                 return [4 /*yield*/, wait()];
                             case 1:
                                 _b.sent();
@@ -58,17 +58,17 @@ var BFS = /** @class */ (function () {
                             case 2:
                                 if (!(queue.isEmpty() == false)) return [3 /*break*/, 8];
                                 u = queue.peek();
-                                _i = 0, _a = u.getListOfNeighbours().sort(function (v, w) { return v.getNodeValue() - w.getNodeValue(); });
+                                _i = 0, _a = u.getNeighbours().sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
                                 _b.label = 3;
                             case 3:
                                 if (!(_i < _a.length)) return [3 /*break*/, 6];
                                 v = _a[_i];
-                                i = v.getNodeValue();
+                                i = v.getVertexValue();
                                 if (!(colour[i] == "white")) return [3 /*break*/, 5];
                                 colour[i] = "grey";
-                                v.setNodeColour("grey");
-                                pred[i] = u.getNodeValue();
-                                done[i] = done[u.getNodeValue()] + 1;
+                                v.setCircleColour("grey");
+                                pred[i] = u.getVertexValue();
+                                done[i] = done[u.getVertexValue()] + 1;
                                 queue.enqueue(v);
                                 return [4 /*yield*/, wait()];
                             case 4:
@@ -79,8 +79,8 @@ var BFS = /** @class */ (function () {
                                 return [3 /*break*/, 3];
                             case 6:
                                 queue.dequeue();
-                                colour[u.getNodeValue()] = "black";
-                                u.setNodeColour("black");
+                                colour[u.getVertexValue()] = "black";
+                                u.setCircleColour("black");
                                 u.setTextColour("white");
                                 return [4 /*yield*/, wait()];
                             case 7:
@@ -91,31 +91,31 @@ var BFS = /** @class */ (function () {
                     });
                 });
             }
-            var sortedNodeList, colour, pred, done, queue, _i, sortedNodeList_1, node;
+            var sortedVertices, colour, pred, done, queue, _i, sortedVertices_1, vertice;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        sortedNodeList = nodeList.sort(function (v, w) { return v.getNodeValue() - w.getNodeValue(); });
-                        colour = new Array(sortedNodeList.length).fill("white");
-                        pred = new Array(sortedNodeList.length).fill(null);
-                        done = new Array(sortedNodeList.length).fill(null);
+                        sortedVertices = vertices.sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
+                        colour = new Array(sortedVertices.length).fill("white");
+                        pred = new Array(sortedVertices.length).fill(null);
+                        done = new Array(sortedVertices.length).fill(null);
                         queue = new Queue();
-                        return [4 /*yield*/, wait()];
+                        _i = 0, sortedVertices_1 = sortedVertices;
+                        _a.label = 1;
                     case 1:
-                        _a.sent();
-                        _i = 0, sortedNodeList_1 = sortedNodeList;
-                        _a.label = 2;
+                        if (!(_i < sortedVertices_1.length)) return [3 /*break*/, 5];
+                        vertice = sortedVertices_1[_i];
+                        if (!(colour[vertice.getVertexValue()] == "white")) return [3 /*break*/, 4];
+                        return [4 /*yield*/, wait()];
                     case 2:
-                        if (!(_i < sortedNodeList_1.length)) return [3 /*break*/, 5];
-                        node = sortedNodeList_1[_i];
-                        if (!(colour[node.getNodeValue()] == "white")) return [3 /*break*/, 4];
-                        return [4 /*yield*/, bfsVisit(node)];
+                        _a.sent();
+                        return [4 /*yield*/, bfsVisit(vertice)];
                     case 3:
                         _a.sent();
                         _a.label = 4;
                     case 4:
                         _i++;
-                        return [3 /*break*/, 2];
+                        return [3 /*break*/, 1];
                     case 5:
                         console.log(pred);
                         console.log(done);

@@ -38,28 +38,28 @@ import { wait } from "../utils.js";
 var DFS = /** @class */ (function () {
     function DFS() {
     }
-    DFS.runAlgorithm = function (nodeList) {
+    DFS.runAlgorithm = function (vertices) {
         return __awaiter(this, void 0, void 0, function () {
-            function dfsRecursiveVisit(node) {
+            function dfsRecursiveVisit(vertice) {
                 return __awaiter(this, void 0, void 0, function () {
                     var s, _i, _a, neighbour;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
                             case 0:
-                                s = node.getNodeValue();
+                                s = vertice.getVertexValue();
                                 colour[s] = "grey";
-                                node.setNodeColour("grey");
+                                vertice.setCircleColour("grey");
                                 seen[s] = time++;
                                 return [4 /*yield*/, wait()];
                             case 1:
                                 _b.sent();
-                                _i = 0, _a = node.getListOfNeighbours().sort(function (v, w) { return v.getNodeValue() - w.getNodeValue(); });
+                                _i = 0, _a = vertice.getNeighbours().sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
                                 _b.label = 2;
                             case 2:
                                 if (!(_i < _a.length)) return [3 /*break*/, 5];
                                 neighbour = _a[_i];
-                                if (!(colour[neighbour.getNodeValue()] == "white")) return [3 /*break*/, 4];
-                                pred[neighbour.getNodeValue()] = s;
+                                if (!(colour[neighbour.getVertexValue()] == "white")) return [3 /*break*/, 4];
+                                pred[neighbour.getVertexValue()] = s;
                                 return [4 /*yield*/, dfsRecursiveVisit(neighbour)];
                             case 3:
                                 _b.sent();
@@ -69,8 +69,8 @@ var DFS = /** @class */ (function () {
                                 return [3 /*break*/, 2];
                             case 5:
                                 colour[s] = "black";
-                                node.setNodeColour("black");
-                                node.setTextColour("white");
+                                vertice.setCircleColour("black");
+                                vertice.setTextColour("white");
                                 done[s] = time++;
                                 return [4 /*yield*/, wait()];
                             case 6:
@@ -80,36 +80,33 @@ var DFS = /** @class */ (function () {
                     });
                 });
             }
-            var sortedNodeList, colour, pred, seen, done, time, _i, sortedNodeList_1, node;
+            var sortedVertices, colour, pred, seen, done, time, _i, sortedVertices_1, vertice;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        sortedNodeList = nodeList.sort(function (v, w) { return v.getNodeValue() - w.getNodeValue(); });
-                        colour = new Array(sortedNodeList.length).fill("white");
-                        pred = new Array(sortedNodeList.length).fill(null);
-                        seen = new Array(sortedNodeList.length).fill(null);
-                        done = new Array(sortedNodeList.length).fill(null);
+                        sortedVertices = vertices.sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
+                        colour = new Array(sortedVertices.length).fill("white");
+                        pred = new Array(sortedVertices.length).fill(null);
+                        seen = new Array(sortedVertices.length).fill(null);
+                        done = new Array(sortedVertices.length).fill(null);
                         time = 0;
-                        return [4 /*yield*/, wait()];
+                        _i = 0, sortedVertices_1 = sortedVertices;
+                        _a.label = 1;
                     case 1:
-                        _a.sent();
-                        _i = 0, sortedNodeList_1 = sortedNodeList;
-                        _a.label = 2;
-                    case 2:
-                        if (!(_i < sortedNodeList_1.length)) return [3 /*break*/, 6];
-                        node = sortedNodeList_1[_i];
-                        if (!(colour[node.getNodeValue()] == "white")) return [3 /*break*/, 5];
+                        if (!(_i < sortedVertices_1.length)) return [3 /*break*/, 5];
+                        vertice = sortedVertices_1[_i];
+                        if (!(colour[vertice.getVertexValue()] == "white")) return [3 /*break*/, 4];
                         return [4 /*yield*/, wait()];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, dfsRecursiveVisit(vertice)];
                     case 3:
                         _a.sent();
-                        return [4 /*yield*/, dfsRecursiveVisit(node)];
+                        _a.label = 4;
                     case 4:
-                        _a.sent();
-                        _a.label = 5;
-                    case 5:
                         _i++;
-                        return [3 /*break*/, 2];
-                    case 6:
+                        return [3 /*break*/, 1];
+                    case 5:
                         console.log(pred);
                         console.log(seen);
                         console.log(done);
