@@ -1,5 +1,6 @@
 import BFS from "./algorithms/bfs.js";
 import DFS from "./algorithms/dfs.js";
+import Edge from "./edge.js";
 import Vertex from "./vertex.js";
 
 enum EditorMode {
@@ -18,6 +19,7 @@ abstract class GraphEditor {
     ) as unknown as SVGSVGElement;
 
     private static vertices: Vertex[] = new Array();
+    private static edges: Edge[] = new Array();
     private static reservedValues: number[] = new Array();
     private static selectedEditorMode: EditorMode = EditorMode.AddElement;
 
@@ -41,6 +43,10 @@ abstract class GraphEditor {
         return this.vertices.find(v => v.getVertexValue() == vertexId)!;
     }
 
+    public static getEdge(edge: SVGPathElement): Edge {
+        return this.edges.find(e => e.getDOMObject() == edge)!;
+    }
+
     public static async addVertex(x: number, y: number): Promise<boolean> {
         const value = this.getNextValue();
         if (value == undefined) return false;
@@ -53,14 +59,10 @@ abstract class GraphEditor {
     }
 
     public static async removeVertex(element: SVGGElement): Promise<void> {
-        const vertex = this.getVertex(element.id);
-        vertex
-            .getEdges()
-            .slice()
-            .reverse()
-            .forEach(edge => this.removeEdge(edge));
-        this.vertices.filter(v => v.hasNeighbour(vertex)).forEach(v => v.removeNeighbour(vertex));
+        const vertex: Vertex = this.getVertex(element.id);
+        const vertexEdges: Edge[] = vertex.getEdges().slice().reverse();
         vertex.destroyDOMObject();
+        vertexEdges.forEach(e => this.edges.splice(this.edges.indexOf(e), 1));
         this.vertices.splice(this.vertices.indexOf(vertex), 1);
         this.reservedValues.splice(this.reservedValues.indexOf(parseInt(element.id)), 1);
     }
@@ -75,38 +77,18 @@ abstract class GraphEditor {
         const vertex = this.getVertex(element.id);
         if (vertex == this.selectedVertex || this.selectedVertex!.hasNeighbour(vertex)) return;
 
-        this.selectedVertex!.addNeighbour(vertex);
+        const start = this.selectedVertex!.getVertexCoords();
+        const end = vertex.getVertexCoords();
 
-        const newEdge = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        const startCoord = this.selectedVertex!.getVertexCoords();
-        const endCoord = vertex.getVertexCoords();
-
-        const edgeAttributes: { [key: string]: string } = {
-            class: "edge",
-            d: `M ${startCoord.x},${startCoord.y} L ${endCoord.x},${endCoord.y}`,
-            stroke: "black",
-            "stroke-width": "3",
-            fill: "none",
-            "marker-end": "url(#arrow)",
-        };
-
-        Object.keys(edgeAttributes).forEach(attr => {
-            newEdge.setAttributeNS(null, attr, edgeAttributes[attr]);
-        });
-
-        this.selectedVertex!.addEdge(newEdge);
-        vertex.addEdge(newEdge);
-        document.getElementById("graphEdgesGroup")!.appendChild(newEdge);
+        const newEdge = new Edge(this.selectedVertex!, vertex);
+        newEdge.createDOMObject(start.x, start.y, end.x, end.y);
+        this.edges.push(newEdge);
     }
 
-    public static async removeEdge(edge: SVGPathElement): Promise<void> {
-        for (const v1 of this.vertices.filter(v => v.hasEdge(edge))) {
-            for (const v2 of this.vertices.filter(v => v.hasEdge(edge))) {
-                if (v1.hasNeighbour(v2)) v1.hasNeighbour(v2);
-            }
-        }
-        this.vertices.filter(v => v.hasEdge(edge)).forEach(v => v.removeEdge(edge));
-        edge.remove();
+    public static async removeEdge(e: SVGPathElement): Promise<void> {
+        const edge: Edge = this.getEdge(e);
+        edge.destroyDOMObject();
+        this.edges.splice(this.edges.indexOf(edge), 1);
     }
 
     public static async editorAddElement(event: MouseEvent): Promise<void> {
@@ -198,6 +180,7 @@ abstract class GraphEditor {
             document.getElementById("graphEdgesGroup")!.replaceChildren();
             document.getElementById("graphVerticesGroup")!.replaceChildren();
             this.vertices = new Array();
+            this.edges = new Array();
             this.reservedValues = new Array();
         }
     }

@@ -1,6 +1,8 @@
+import Edge from "./edge.js";
+
 export default class Vertex {
     private neighbours: Vertex[] = new Array();
-    private edges: SVGPathElement[] = new Array();
+    private edges: Edge[] = new Array();
     private value: number;
     private x: number;
     private y: number;
@@ -56,6 +58,10 @@ export default class Vertex {
     }
 
     public destroyDOMObject(): void {
+        this.edges
+            .slice()
+            .reverse()
+            .forEach(edge => edge.destroyDOMObject());
         this.vertexGroup.remove();
     }
 
@@ -76,20 +82,20 @@ export default class Vertex {
         return this.neighbours;
     }
 
-    public addEdge(edge: SVGPathElement): void {
+    public addEdge(edge: Edge): void {
         this.edges.push(edge);
     }
 
-    public removeEdge(edge: SVGPathElement): void {
+    public removeEdge(edge: Edge): void {
         this.edges.splice(this.edges.indexOf(edge), 1);
     }
 
-    public hasEdge(edge: SVGPathElement): boolean {
+    public hasEdge(edge: Edge): boolean {
         if (this.edges.indexOf(edge) == -1) return false;
         return true;
     }
 
-    public getEdges(): SVGPathElement[] {
+    public getEdges(): Edge[] {
         return this.edges;
     }
 
