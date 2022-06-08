@@ -18,6 +18,6 @@ jobs:
               uses: peaceiris/actions-gh-pages@v3
               with:
                 github_token: ${{ secrets.GITHUB_TOKEN }}
-                public_dir: ./public
-                public_branch: gh-pages
+                publish_dir: ./public
+                publish_branch: gh-pages
                 cname: graph.dakskihedron.com
