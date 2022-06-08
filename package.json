@@ -1,14 +1,16 @@
 {
-  "name": "graph-visualiser",
-  "version": "1.0.0",
-  "homepage": "graph.dakskihedron.com",
-  "main": "./dist/index.js",
-  "author": "Dakskihedron",
-  "license": "MIT",
-  "devDependencies": {
-    "typescript": "^4.7.3"
-  },
-  "scripts": {
-    "build": "yarn tsc"
-  }
+    "name": "graph-visualiser",
+    "version": "1.0.0",
+    "homepage": "graph.dakskihedron.com",
+    "author": "Dakskihedron",
+    "license": "MIT",
+    "devDependencies": {
+        "gh-pages": "^4.0.0",
+        "typescript": "^4.7.3"
+    },
+    "scripts": {
+        "build": "yarn tsc",
+        "predeploy": "yarn build",
+        "deploy": "gh-pages -d public"
+    }
 }
