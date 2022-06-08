@@ -1,116 +1,124 @@
-export default class GraphNode {
-    private _adjacentNodeList: GraphNode[] = new Array();
-    private _edgesList: SVGPathElement[] = new Array();
-    private _nodeValue: number;
-    private _element: SVGGElement;
-    private _x: number;
-    private _y: number;
+export default class Vertex {
+    private neighbours: Vertex[] = new Array();
+    private edges: SVGPathElement[] = new Array();
+    private value: number;
+    private x: number;
+    private y: number;
 
-    public constructor(nv: number, x: number, y: number) {
-        this._nodeValue = nv;
-        this._x = x;
-        this._y = y;
-        this._element = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        this.createDOMElement(x, y);
+    private vertexGroup: SVGGElement;
+    private vertexCircle: SVGCircleElement;
+    private vertexText: SVGTextElement;
+
+    public constructor(value: number, x: number, y: number) {
+        this.value = value;
+        this.x = x;
+        this.y = y;
+        this.vertexGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        this.vertexCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        this.vertexText = document.createElementNS("http://www.w3.org/2000/svg", "text");
     }
 
-    public createDOMElement(x: number, y: number): void {
-        const elementCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        const elementText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        const text = document.createTextNode(String(this._nodeValue));
+    public createDOMObject(x: number, y: number): void {
+        this.vertexGroup.setAttributeNS(null, "id", String(this.value));
+        this.vertexGroup.setAttributeNS(null, "class", "vertex");
+        this.vertexText.textContent = String(this.value);
 
-        this._element.setAttributeNS(null, "class", "graph-node");
-        this._element.setAttributeNS(null, "id", String(this._nodeValue));
+        const circleAttributes: { [key: string]: string } = {
+            cx: String(x),
+            cy: String(y),
+            r: "25",
+            fill: "white",
+            stroke: "black",
+            "stroke-width": "3",
+        };
 
-        elementCircle.setAttributeNS(null, "cx", String(x));
-        elementCircle.setAttributeNS(null, "cy", String(y));
-        elementCircle.setAttributeNS(null, "r", "25");
-        elementCircle.setAttributeNS(null, "fill", "white");
-        elementCircle.setAttributeNS(null, "stroke", "black");
-        elementCircle.setAttributeNS(null, "stroke-width", "3");
+        const textAttributes: { [key: string]: string } = {
+            x: String(x),
+            y: String(y),
+            dy: ".35em",
+            fill: "black",
+            stroke: "black",
+            "font-size": "20px",
+            "text-anchor": "middle",
+        };
 
-        elementText.setAttributeNS(null, "x", String(x));
-        elementText.setAttributeNS(null, "y", String(y));
-        elementText.setAttributeNS(null, "dy", ".35em");
-        elementText.setAttributeNS(null, "text-anchor", "middle");
-        elementText.setAttributeNS(null, "font-size", "20px");
-        elementText.setAttributeNS(null, "stroke", "black");
-        elementText.setAttributeNS(null, "fill", "black");
+        Object.keys(circleAttributes).forEach(attr => {
+            this.vertexCircle.setAttributeNS(null, attr, circleAttributes[attr]);
+        });
 
-        elementText.appendChild(text);
-        this._element.appendChild(elementCircle);
-        this._element.appendChild(elementText);
-        document.getElementById("graphEditorNodesGroup")!.appendChild(this._element);
+        Object.keys(textAttributes).forEach(attr => {
+            this.vertexText.setAttributeNS(null, attr, textAttributes[attr]);
+        });
+
+        this.vertexGroup.appendChild(this.vertexCircle);
+        this.vertexGroup.appendChild(this.vertexText);
+        document.getElementById("graphVerticesGroup")!.appendChild(this.vertexGroup);
     }
 
-    public destoryDOMElement(): void {
-        this._element.remove();
+    public destroyDOMObject(): void {
+        this.vertexGroup.remove();
     }
 
-    public addAdjacentNode(node: GraphNode): void {
-        this._adjacentNodeList.push(node);
+    public addNeighbour(vertex: Vertex): void {
+        this.neighbours.push(vertex);
     }
 
-    public removeAdjacentNode(node: GraphNode): void {
-        this._adjacentNodeList.splice(this._adjacentNodeList.indexOf(node), 1);
+    public removeNeighbour(vertex: Vertex): void {
+        this.neighbours.splice(this.neighbours.indexOf(vertex), 1);
     }
 
-    public hasAdjacentNode(node: GraphNode): boolean {
-        if (this._adjacentNodeList.indexOf(node) == -1) return false;
+    public hasNeighbour(vertex: Vertex): boolean {
+        if (this.neighbours.indexOf(vertex) == -1) return false;
         return true;
+    }
+
+    public getNeighbours(): Vertex[] {
+        return this.neighbours;
     }
 
     public addEdge(edge: SVGPathElement): void {
-        this._edgesList.push(edge);
+        this.edges.push(edge);
     }
 
     public removeEdge(edge: SVGPathElement): void {
-        this._edgesList.splice(this._edgesList.indexOf(edge), 1);
+        this.edges.splice(this.edges.indexOf(edge), 1);
     }
 
     public hasEdge(edge: SVGPathElement): boolean {
-        if (this._edgesList.indexOf(edge) == -1) return false;
+        if (this.edges.indexOf(edge) == -1) return false;
         return true;
     }
 
-    public getListOfNeighbours(): GraphNode[] {
-        return this._adjacentNodeList;
+    public getEdges(): SVGPathElement[] {
+        return this.edges;
     }
 
-    public getListOfEdges(): SVGPathElement[] {
-        return this._edgesList;
+    public getVertexValue(): number {
+        return this.value;
     }
 
-    public getNodeValue(): number {
-        return this._nodeValue;
-    }
-
-    public getNodeCoordinates(): { x: number, y: number} {
-        return { x: this._x, y: this._y };
+    public getVertexCoords(): { x: number; y: number } {
+        return { x: this.x, y: this.y };
     }
 
     public toggleSelected(): void {
-        const circle = this._element.firstChild as SVGCircleElement;
-        if (circle.getAttributeNS(null, "fill") == "white") {
-            circle.setAttributeNS(null, "fill", "#d6e9ff");
+        if (this.vertexCircle.getAttributeNS(null, "fill") == "white") {
+            this.vertexCircle.setAttributeNS(null, "fill", "#d6e9ff");
         } else {
-            circle.setAttributeNS(null, "fill", "white");
+            this.vertexCircle.setAttributeNS(null, "fill", "white");
         }
     }
 
-    public getNodeColour(): string {
-        const circle = this._element.firstChild as SVGCircleElement;
-        return circle.getAttributeNS(null, "fill")!;
+    public getCircleColour(): string {
+        return this.vertexCircle.getAttributeNS(null, "fill")!;
     }
 
-    public setNodeColour(colour: string): void {
-        const circle = this._element.firstChild as SVGCircleElement;
-        circle.setAttributeNS(null, "fill", colour);
+    public setCircleColour(colour: string): void {
+        this.vertexCircle.setAttributeNS(null, "fill", colour);
     }
 
     public setTextColour(colour: string): void {
-        const text = this._element.lastChild as SVGTextElement;
-        text.setAttributeNS(null, "stroke", colour);
-        text.setAttributeNS(null, "fill", colour);
+        this.vertexText.setAttributeNS(null, "stroke", colour);
+        this.vertexText.setAttributeNS(null, "fill", colour);
     }
 }
