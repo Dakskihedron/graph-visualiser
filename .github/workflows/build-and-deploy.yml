@@ -6,12 +6,16 @@ jobs:
         steps:
             - name: Setup checkout
               uses: actions/checkout@v3
-            - name: Setup node
-              uses: actions/setup-node@v3
+            - name: borales/actions-yarn@v3.0.0
               with:
-                  node-version: "14"
-                  cache: "yarn"
-            - name: Install dependencies
-              run: yarn install --frozen-lockfile
-            - name: Build and deploy
-              run: yarn deploy
+                cmd: install
+            - name: borales/actions-yarn@v3.0.0
+              with:
+                cmd: build
+            - name: Deploy
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                public_dir: ./public
+                public_branch: gh-pages
+                cname: graph.dakskihedron.com
