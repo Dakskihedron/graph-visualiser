@@ -1,11 +1,14 @@
-#graphEditorWindow {
+#editorWindow {
     box-sizing: border-box;
     border: 1px solid black;
 }
 
-.graph-node {
+.vertex {
     box-sizing: border-box;
     cursor: pointer;
     font-size: 14px;
-    color: black;
+}
+
+.edge {
+    cursor: pointer;
 }
