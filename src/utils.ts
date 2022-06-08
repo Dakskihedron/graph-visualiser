@@ -1,5 +1,5 @@
 export async function wait(ms: number = 1000): Promise<void> {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>(resolve => {
         setTimeout(resolve, ms);
     });
 }
@@ -28,6 +28,6 @@ export class Queue<T> {
     }
 
     public toString(): string {
-        return `<- |${this._data.join(", ")}| <-`
+        return `<- |${this._data.join(", ")}| <-`;
     }
 }
