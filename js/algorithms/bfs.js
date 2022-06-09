@@ -51,6 +51,11 @@ var BFS = /** @class */ (function () {
                                 vertice.setCircleColour("grey");
                                 done[s] = 0;
                                 queue.enqueue(vertice);
+                                valueQueue.enqueue(vertice.getVertexValue());
+                                console.log("Queue: ".concat(valueQueue));
+                                console.log("Pred: ".concat(pred));
+                                console.log("Done: ".concat(done));
+                                console.log(" ");
                                 return [4 /*yield*/, wait()];
                             case 1:
                                 _b.sent();
@@ -70,6 +75,11 @@ var BFS = /** @class */ (function () {
                                 pred[i] = u.getVertexValue();
                                 done[i] = done[u.getVertexValue()] + 1;
                                 queue.enqueue(v);
+                                valueQueue.enqueue(v.getVertexValue());
+                                console.log("Queue: ".concat(valueQueue));
+                                console.log("Pred: ".concat(pred));
+                                console.log("Done: ".concat(done));
+                                console.log(" ");
                                 return [4 /*yield*/, wait()];
                             case 4:
                                 _b.sent();
@@ -79,9 +89,14 @@ var BFS = /** @class */ (function () {
                                 return [3 /*break*/, 3];
                             case 6:
                                 queue.dequeue();
+                                valueQueue.dequeue();
                                 colour[u.getVertexValue()] = "black";
                                 u.setCircleColour("black");
                                 u.setTextColour("white");
+                                console.log("Queue: ".concat(valueQueue));
+                                console.log("Pred: ".concat(pred));
+                                console.log("Done: ".concat(done));
+                                console.log(" ");
                                 return [4 /*yield*/, wait()];
                             case 7:
                                 _b.sent();
@@ -91,15 +106,21 @@ var BFS = /** @class */ (function () {
                     });
                 });
             }
-            var sortedVertices, colour, pred, done, queue, _i, sortedVertices_1, vertice;
+            var sortedVertices, colour, pred, done, queue, valueQueue, _i, sortedVertices_1, vertice;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         sortedVertices = vertices.sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
                         colour = new Array(sortedVertices.length).fill("white");
-                        pred = new Array(sortedVertices.length).fill(null);
-                        done = new Array(sortedVertices.length).fill(null);
+                        pred = new Array(sortedVertices.length).fill(-1);
+                        done = new Array(sortedVertices.length).fill(-1);
                         queue = new Queue();
+                        valueQueue = new Queue();
+                        console.log("Breadth-first search");
+                        console.log("Queue: ".concat(valueQueue));
+                        console.log("Pred: ".concat(pred));
+                        console.log("Done: ".concat(done));
+                        console.log(" ");
                         _i = 0, sortedVertices_1 = sortedVertices;
                         _a.label = 1;
                     case 1:
@@ -116,10 +137,7 @@ var BFS = /** @class */ (function () {
                     case 4:
                         _i++;
                         return [3 /*break*/, 1];
-                    case 5:
-                        console.log(pred);
-                        console.log(done);
-                        return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });

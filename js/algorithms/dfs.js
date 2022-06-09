@@ -34,7 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import { wait } from "../utils.js";
+import { Stack, wait } from "../utils.js";
 var DFS = /** @class */ (function () {
     function DFS() {
     }
@@ -50,6 +50,12 @@ var DFS = /** @class */ (function () {
                                 colour[s] = "grey";
                                 vertice.setCircleColour("grey");
                                 seen[s] = time++;
+                                stack.push(s);
+                                console.log("Stack: ".concat(stack));
+                                console.log("Pred: ".concat(pred));
+                                console.log("Seen: ".concat(seen));
+                                console.log("Done: ".concat(done));
+                                console.log(" ");
                                 return [4 /*yield*/, wait()];
                             case 1:
                                 _b.sent();
@@ -72,6 +78,12 @@ var DFS = /** @class */ (function () {
                                 vertice.setCircleColour("black");
                                 vertice.setTextColour("white");
                                 done[s] = time++;
+                                stack.pop();
+                                console.log("Stack: ".concat(stack));
+                                console.log("Pred: ".concat(pred));
+                                console.log("Seen: ".concat(seen));
+                                console.log("Done: ".concat(done));
+                                console.log(" ");
                                 return [4 /*yield*/, wait()];
                             case 6:
                                 _b.sent();
@@ -80,16 +92,23 @@ var DFS = /** @class */ (function () {
                     });
                 });
             }
-            var sortedVertices, colour, pred, seen, done, time, _i, sortedVertices_1, vertice;
+            var sortedVertices, colour, pred, seen, done, stack, time, _i, sortedVertices_1, vertice;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         sortedVertices = vertices.sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
                         colour = new Array(sortedVertices.length).fill("white");
-                        pred = new Array(sortedVertices.length).fill(null);
-                        seen = new Array(sortedVertices.length).fill(null);
-                        done = new Array(sortedVertices.length).fill(null);
+                        pred = new Array(sortedVertices.length).fill(-1);
+                        seen = new Array(sortedVertices.length).fill(-1);
+                        done = new Array(sortedVertices.length).fill(-1);
+                        stack = new Stack();
                         time = 0;
+                        console.log("Depth-first search");
+                        console.log("Stack: ".concat(stack));
+                        console.log("Pred: ".concat(pred));
+                        console.log("Seen: ".concat(seen));
+                        console.log("Done: ".concat(done));
+                        console.log(" ");
                         _i = 0, sortedVertices_1 = sortedVertices;
                         _a.label = 1;
                     case 1:
@@ -106,11 +125,7 @@ var DFS = /** @class */ (function () {
                     case 4:
                         _i++;
                         return [3 /*break*/, 1];
-                    case 5:
-                        console.log(pred);
-                        console.log(seen);
-                        console.log(done);
-                        return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });

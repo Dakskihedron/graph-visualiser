@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 import BFS from "./algorithms/bfs.js";
 import DFS from "./algorithms/dfs.js";
+import Floyd from "./algorithms/floyd.js";
 import Edge from "./edge.js";
 import Vertex from "./vertex.js";
 var EditorMode;
@@ -47,6 +48,7 @@ var AlgorithmSelection;
 (function (AlgorithmSelection) {
     AlgorithmSelection["BFS"] = "bfs";
     AlgorithmSelection["DFS"] = "dfs";
+    AlgorithmSelection["Floyd"] = "floyd";
 })(AlgorithmSelection || (AlgorithmSelection = {}));
 var GraphEditor = /** @class */ (function () {
     function GraphEditor() {
@@ -124,11 +126,11 @@ var GraphEditor = /** @class */ (function () {
             });
         });
     };
-    GraphEditor.removeEdge = function (e) {
+    GraphEditor.removeEdge = function (element) {
         return __awaiter(this, void 0, void 0, function () {
             var edge;
             return __generator(this, function (_a) {
-                edge = this.getEdge(e);
+                edge = this.getEdge(element);
                 edge.destroyDOMObject();
                 this.edges.splice(this.edges.indexOf(edge), 1);
                 return [2 /*return*/];
@@ -153,23 +155,27 @@ var GraphEditor = /** @class */ (function () {
                         this.selectedVertex.toggleSelected();
                         this.selectedVertex = null;
                         this.drawingEdge = false;
-                        return [3 /*break*/, 7];
+                        return [3 /*break*/, 8];
                     case 3:
                         if (!(element instanceof SVGGElement && element.classList.contains("vertex"))) return [3 /*break*/, 5];
                         return [4 /*yield*/, this.addEdgeStart(element)];
                     case 4:
                         _a.sent();
-                        return [3 /*break*/, 7];
+                        return [3 /*break*/, 8];
                     case 5:
-                        if (!(event.target == this.graphEditor)) return [3 /*break*/, 7];
+                        if (!(element instanceof SVGGElement && element.classList.contains("edge"))) return [3 /*break*/, 6];
+                        this.getEdge(element).setWeight();
+                        return [3 /*break*/, 8];
+                    case 6:
+                        if (!(event.target == this.graphEditor)) return [3 /*break*/, 8];
                         coord = this.translatePos(event);
                         return [4 /*yield*/, this.addVertex(coord.x, coord.y)];
-                    case 6:
+                    case 7:
                         success = _a.sent();
                         if (success == false)
                             alert("Vertex limit reached.");
-                        _a.label = 7;
-                    case 7: return [2 /*return*/];
+                        _a.label = 8;
+                    case 8: return [2 /*return*/];
                 }
             });
         });
@@ -180,15 +186,15 @@ var GraphEditor = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        element = event.target;
-                        if (!(element instanceof SVGPathElement)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.removeEdge(element)];
+                        element = event.target.parentElement;
+                        if (!(element instanceof SVGGElement && element.classList.contains("vertex"))) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.removeVertex(element)];
                     case 1:
                         _a.sent();
                         return [3 /*break*/, 4];
                     case 2:
-                        if (!(element.parentElement instanceof SVGGElement && element.parentElement.classList.contains("vertex"))) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.removeVertex(element.parentElement)];
+                        if (!(element instanceof SVGGElement && element.classList.contains("edge"))) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.removeEdge(element)];
                     case 3:
                         _a.sent();
                         _a.label = 4;
@@ -296,17 +302,22 @@ var GraphAlgorithmVisualiser = /** @class */ (function () {
                         switch (_a) {
                             case AlgorithmSelection.BFS: return [3 /*break*/, 1];
                             case AlgorithmSelection.DFS: return [3 /*break*/, 3];
+                            case AlgorithmSelection.Floyd: return [3 /*break*/, 5];
                         }
-                        return [3 /*break*/, 5];
+                        return [3 /*break*/, 7];
                     case 1: return [4 /*yield*/, BFS.runAlgorithm(GraphEditor.getVertices())];
                     case 2:
                         _b.sent();
-                        return [3 /*break*/, 5];
+                        return [3 /*break*/, 7];
                     case 3: return [4 /*yield*/, DFS.runAlgorithm(GraphEditor.getVertices())];
                     case 4:
                         _b.sent();
-                        return [3 /*break*/, 5];
-                    case 5:
+                        return [3 /*break*/, 7];
+                    case 5: return [4 /*yield*/, Floyd.runAlgorithm(GraphEditor.getVertices())];
+                    case 6:
+                        _b.sent();
+                        return [3 /*break*/, 7];
+                    case 7:
                         GraphEditor.setProcessStatus(false);
                         return [2 /*return*/];
                 }

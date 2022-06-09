@@ -46,26 +46,51 @@ export function wait(ms) {
 }
 var Queue = /** @class */ (function () {
     function Queue() {
-        this._data = new Array();
+        this.data = new Array();
     }
     Queue.prototype.enqueue = function (item) {
-        this._data.push(item);
+        this.data.push(item);
     };
     Queue.prototype.dequeue = function () {
-        this._data.splice(0, 1);
+        this.data.splice(0, 1);
     };
     Queue.prototype.peek = function () {
-        return this._data[0];
+        return this.data[0];
     };
     Queue.prototype.size = function () {
-        return this._data.length;
+        return this.data.length;
     };
     Queue.prototype.isEmpty = function () {
-        return this._data.length == 0;
+        return this.data.length == 0;
     };
     Queue.prototype.toString = function () {
-        return "<- |".concat(this._data.join(", "), "| <-");
+        return "<- |".concat(this.data.join(", "), "| <-");
     };
     return Queue;
 }());
 export { Queue };
+var Stack = /** @class */ (function () {
+    function Stack() {
+        this.data = new Array();
+    }
+    Stack.prototype.push = function (item) {
+        this.data.push(item);
+    };
+    Stack.prototype.pop = function () {
+        this.data.pop();
+    };
+    Stack.prototype.peek = function () {
+        return this.data[this.data.length - 1];
+    };
+    Stack.prototype.size = function () {
+        return this.data.length;
+    };
+    Stack.prototype.isEmpty = function () {
+        return this.data.length == 0;
+    };
+    Stack.prototype.toString = function () {
+        return "[".concat(this.data.join(", "), " <-");
+    };
+    return Stack;
+}());
+export { Stack };
