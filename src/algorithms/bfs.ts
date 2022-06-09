@@ -5,9 +5,17 @@ export default abstract class BFS {
     public static async runAlgorithm(vertices: Vertex[]): Promise<void> {
         const sortedVertices = vertices.sort((v, w) => v.getVertexValue() - w.getVertexValue());
         const colour: string[] = new Array(sortedVertices.length).fill("white");
-        const pred: number[] = new Array(sortedVertices.length).fill(null);
-        const done: number[] = new Array(sortedVertices.length).fill(null);
+        const pred: number[] = new Array(sortedVertices.length).fill(-1);
+        const done: number[] = new Array(sortedVertices.length).fill(-1);
         const queue = new Queue<Vertex>();
+        const valueQueue = new Queue<number>();
+
+        console.log("Breadth-first search");
+
+        console.log(`Queue: ${valueQueue}`);
+        console.log(`Pred: ${pred}`);
+        console.log(`Done: ${done}`);
+        console.log(" ");
 
         async function bfsVisit(vertice: Vertex) {
             const s = vertice.getVertexValue();
@@ -15,6 +23,12 @@ export default abstract class BFS {
             vertice.setCircleColour("grey");
             done[s] = 0;
             queue.enqueue(vertice);
+            valueQueue.enqueue(vertice.getVertexValue());
+
+            console.log(`Queue: ${valueQueue}`);
+            console.log(`Pred: ${pred}`);
+            console.log(`Done: ${done}`);
+            console.log(" ");
 
             await wait();
 
@@ -28,13 +42,26 @@ export default abstract class BFS {
                         pred[i] = u.getVertexValue();
                         done[i] = done[u.getVertexValue()] + 1;
                         queue.enqueue(v);
+                        valueQueue.enqueue(v.getVertexValue());
+
+                        console.log(`Queue: ${valueQueue}`);
+                        console.log(`Pred: ${pred}`);
+                        console.log(`Done: ${done}`);
+                        console.log(" ");
+
                         await wait();
                     }
                 }
                 queue.dequeue();
+                valueQueue.dequeue();
                 colour[u.getVertexValue()] = "black";
                 u.setCircleColour("black");
                 u.setTextColour("white");
+
+                console.log(`Queue: ${valueQueue}`);
+                console.log(`Pred: ${pred}`);
+                console.log(`Done: ${done}`);
+                console.log(" ");
 
                 await wait();
             }
@@ -46,8 +73,5 @@ export default abstract class BFS {
                 await bfsVisit(vertice);
             }
         }
-
-        console.log(pred);
-        console.log(done);
     }
 }
