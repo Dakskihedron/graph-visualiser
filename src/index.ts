@@ -1,5 +1,6 @@
 import BFS from "./algorithms/bfs.js";
 import DFS from "./algorithms/dfs.js";
+import Floyd from "./algorithms/floyd.js";
 import Edge from "./edge.js";
 import Vertex from "./vertex.js";
 
@@ -11,6 +12,7 @@ enum EditorMode {
 enum AlgorithmSelection {
     BFS = "bfs",
     DFS = "dfs",
+    Floyd = "floyd",
 }
 
 abstract class GraphEditor {
@@ -43,7 +45,7 @@ abstract class GraphEditor {
         return this.vertices.find(v => v.getVertexValue() == vertexId)!;
     }
 
-    public static getEdge(edge: SVGPathElement): Edge {
+    public static getEdge(edge: SVGGElement): Edge {
         return this.edges.find(e => e.getDOMObject() == edge)!;
     }
 
@@ -85,14 +87,14 @@ abstract class GraphEditor {
         this.edges.push(newEdge);
     }
 
-    public static async removeEdge(e: SVGPathElement): Promise<void> {
-        const edge: Edge = this.getEdge(e);
+    public static async removeEdge(element: SVGGElement): Promise<void> {
+        const edge: Edge = this.getEdge(element);
         edge.destroyDOMObject();
         this.edges.splice(this.edges.indexOf(edge), 1);
     }
 
     public static async editorAddElement(event: MouseEvent): Promise<void> {
-        const element = (event.target as Element).parentElement;
+        const element: HTMLElement = (event.target as HTMLElement).parentElement as HTMLElement;
         if (this.drawingEdge == true) {
             if (this.selectedEditorMode == EditorMode.AddElement) {
                 if (element instanceof SVGGElement && element.classList.contains("vertex")) {
@@ -104,6 +106,8 @@ abstract class GraphEditor {
             this.drawingEdge = false;
         } else if (element instanceof SVGGElement && element.classList.contains("vertex")) {
             await this.addEdgeStart(element);
+        } else if (element instanceof SVGGElement && element.classList.contains("edge")) {
+            this.getEdge(element).setWeight();
         } else if (event.target == this.graphEditor) {
             const coord = this.translatePos(event);
             const success = await this.addVertex(coord.x, coord.y);
@@ -112,11 +116,11 @@ abstract class GraphEditor {
     }
 
     public static async editorRemoveElement(event: MouseEvent): Promise<void> {
-        const element = event.target as Element;
-        if (element instanceof SVGPathElement) {
-            await this.removeEdge(element as SVGPathElement);
-        } else if (element.parentElement instanceof SVGGElement && element.parentElement.classList.contains("vertex")) {
-            await this.removeVertex(element.parentElement as SVGGElement);
+        const element: HTMLElement = (event.target as HTMLElement).parentElement as HTMLElement;
+        if (element instanceof SVGGElement && element.classList.contains("vertex")) {
+            await this.removeVertex(element as SVGGElement);
+        } else if (element instanceof SVGGElement && element.classList.contains("edge")) {
+            await this.removeEdge(element as SVGGElement);
         }
     }
 
@@ -199,6 +203,9 @@ abstract class GraphAlgorithmVisualiser {
                 break;
             case AlgorithmSelection.DFS:
                 await DFS.runAlgorithm(GraphEditor.getVertices());
+                break;
+            case AlgorithmSelection.Floyd:
+                await Floyd.runAlgorithm(GraphEditor.getVertices());
                 break;
         }
 

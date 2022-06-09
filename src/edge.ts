@@ -3,19 +3,27 @@ import Vertex from "./vertex.js";
 export default class Edge {
     private startVertex: Vertex;
     private endVertex: Vertex;
-    private edge: SVGPathElement;
     private weight: number;
+
+    private edgeGroup: SVGGElement;
+    private edgePath: SVGPathElement;
+    private edgeText: SVGTextElement;
 
     public constructor(start: Vertex, end: Vertex, weight: number = 0) {
         this.startVertex = start;
         this.endVertex = end;
-        this.edge = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this.weight = weight;
+
+        this.edgeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        this.edgePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        this.edgeText = document.createElementNS("http://www.w3.org/2000/svg", "text");
     }
 
     public createDOMObject(mx: number, my: number, lx: number, ly: number): void {
-        const edgeAttributes: { [key: string]: string } = {
-            class: "edge",
+        this.edgeGroup.setAttributeNS(null, "class", "edge");
+        this.edgeText.textContent = String(this.weight);
+
+        const pathAttributes: { [key: string]: string } = {
             d: `M ${mx},${my} L ${lx},${ly}`,
             stroke: "black",
             "stroke-width": "3",
@@ -23,33 +31,61 @@ export default class Edge {
             "marker-end": "url(#arrow)",
         };
 
-        Object.keys(edgeAttributes).forEach(attr => {
-            this.edge.setAttributeNS(null, attr, edgeAttributes[attr]);
+        Object.keys(pathAttributes).forEach(attr => {
+            this.edgePath.setAttributeNS(null, attr, pathAttributes[attr]);
+        });
+
+        const sc = this.startVertex.getVertexCoords();
+        const ec = this.endVertex.getVertexCoords();
+        const midpoint = { x: (sc.x + ec.x) / 2, y: (sc.y + ec.y) / 2 };
+        const slope = (ec.y - sc.y) / (ec.x - sc.x);
+        const dy = Math.sqrt(Math.pow(14, 2) / (Math.pow(slope, 2) + 1));
+        const dx = -slope * dy;
+
+        const textAttributes: { [key: string]: string } = {
+            x: String(midpoint.x + dx),
+            y: String(midpoint.y + dy),
+            dy: ".35em",
+            stroke: "black",
+            "stroke-width": "1",
+            "font-size": "15px",
+        };
+
+        Object.keys(textAttributes).forEach(attr => {
+            this.edgeText.setAttributeNS(null, attr, textAttributes[attr]);
         });
 
         this.startVertex.addEdge(this);
         this.startVertex.addNeighbour(this.endVertex);
         this.endVertex.addEdge(this);
-        document.getElementById("graphEdgesGroup")!.appendChild(this.edge);
+
+        this.edgeGroup.appendChild(this.edgePath);
+        this.edgeGroup.appendChild(this.edgeText);
+        document.getElementById("graphEdgesGroup")!.appendChild(this.edgeGroup);
     }
 
     public destroyDOMObject(): void {
         this.startVertex.removeEdge(this);
         this.startVertex.removeNeighbour(this.endVertex);
         this.endVertex.removeEdge(this);
-        this.edge.remove();
+        this.edgeGroup.remove();
     }
 
-    public getDOMObject(): SVGPathElement {
-        return this.edge;
+    public getDOMObject(): SVGGElement {
+        return this.edgeGroup;
     }
 
     public getWeight(): number {
         return this.weight;
     }
 
-    public setWeight(weight: number): void {
-        this.weight = weight;
+    public setWeight(): void {
+        let weight: any = prompt("Set new weight:", String(this.weight));
+        if (isNaN(weight)) {
+            return alert("Not a number.");
+        }
+        this.weight = parseInt(weight);
+        this.edgeText.textContent = String(parseInt(weight));
     }
 
     public getStartVertex(): Vertex {
