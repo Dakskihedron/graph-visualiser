@@ -58,7 +58,7 @@ var Floyd = /** @class */ (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        sortedVertices = vertices.sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
+                        sortedVertices = vertices.slice().sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
                         distMatrix = new Array(vertices.length)
                             .fill(undefined)
                             .map(function () { return Array(vertices.length).fill(_this.inf); });

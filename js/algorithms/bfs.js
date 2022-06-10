@@ -110,7 +110,7 @@ var BFS = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        sortedVertices = vertices.sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
+                        sortedVertices = vertices.slice().sort(function (v, w) { return v.getVertexValue() - w.getVertexValue(); });
                         colour = new Array(sortedVertices.length).fill("white");
                         pred = new Array(sortedVertices.length).fill(-1);
                         done = new Array(sortedVertices.length).fill(-1);
