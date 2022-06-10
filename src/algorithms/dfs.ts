@@ -3,7 +3,7 @@ import { Stack, wait } from "../utils.js";
 
 export default abstract class DFS {
     public static async runAlgorithm(vertices: Vertex[]): Promise<void> {
-        const sortedVertices = vertices.sort((v, w) => v.getVertexValue() - w.getVertexValue());
+        const sortedVertices = vertices.slice().sort((v, w) => v.getVertexValue() - w.getVertexValue());
         const colour: string[] = new Array(sortedVertices.length).fill("white");
         const pred: number[] = new Array(sortedVertices.length).fill(-1);
         const seen: number[] = new Array(sortedVertices.length).fill(-1);
