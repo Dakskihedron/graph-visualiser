@@ -60,11 +60,15 @@ var Edge = /** @class */ (function () {
     };
     Edge.prototype.setWeight = function () {
         var weight = prompt("Set new weight:", String(this.weight));
-        if (isNaN(weight)) {
+        if (!weight || !weight.trim()) {
             return alert("Not a number.");
         }
-        this.weight = parseInt(weight);
-        this.edgeText.textContent = String(parseInt(weight));
+        var intWeight = parseInt(weight, 10);
+        if (isNaN(intWeight)) {
+            return alert("Not a number.");
+        }
+        this.weight = intWeight;
+        this.edgeText.textContent = String(intWeight);
     };
     Edge.prototype.getStartVertex = function () {
         return this.startVertex;
