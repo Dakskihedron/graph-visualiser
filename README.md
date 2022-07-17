@@ -1,5 +1,5 @@
 # Graph Visualiser
-A work in progress tool for graphing and visualising graph-theoretic algorithms. Intended to be used for COMPSCI 220 at the University of Auckland.
+## Rewrite coming soon.
 ## Installation
 To run your own version locally:
 1. Clone the repository
