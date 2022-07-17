@@ -1,0 +1,11 @@
+#graph {
+  width: 700px;
+  height: 700px;
+  box-sizing: border-box;
+  border: 1px solid black;
+  user-select: none;
+}
+
+.vertex {
+  cursor: pointer;
+}
