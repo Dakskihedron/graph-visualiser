@@ -1,5 +1,5 @@
 # Graph Visualiser
-## Rewrite coming soon.
+### Rewrite coming soon.
 ## Installation
 To run your own version locally:
 1. Clone the repository
